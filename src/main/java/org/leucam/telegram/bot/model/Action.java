@@ -22,6 +22,8 @@ public class Action {
     @Column
     private FrontBackType frontBackType;
     @Column
+    private ColorType colorType;
+    @Column
     private Integer telegramUserId;
     @Column
     private Integer numberOfCopies;
@@ -35,6 +37,7 @@ public class Action {
         return "Ordine in corso" +
                 "\nNome del file='" + name + '\'' +
                 "\nTipo di ordine=" + actionType.getLabel() +
+                "\nBianco e Nero o Colore=" + (colorType != null ? colorType.getLabel() : "NON DEFINITO") +
                 "\nFronte/Retro=" + (frontBackType != null ? frontBackType.getLabel() : "NON DEFINITO") +
                 "\nPagine per foglio=" + (pagesPerSheet != null ? String.valueOf(pagesPerSheet) : "NON DEFINITO") +
                 "\nNumero di copie=" + (numberOfCopies != null ? String.valueOf(numberOfCopies) : "NON DEFINITO") +

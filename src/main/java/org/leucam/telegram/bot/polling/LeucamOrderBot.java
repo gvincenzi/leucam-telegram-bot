@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.leucam.telegram.bot.model.Action;
 import org.leucam.telegram.bot.model.ActionType;
+import org.leucam.telegram.bot.model.ColorType;
 import org.leucam.telegram.bot.model.FrontBackType;
 import org.leucam.telegram.bot.polling.factory.ItemFactory;
 import org.leucam.telegram.bot.service.ResourceManagerService;
@@ -53,7 +54,7 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 resourceManagerService.deleteUser(user_id);
                 message = itemFactory.message(chat_id, "Utente rimosso correttamente");
             } else if(call_data.equals("stampaImmediata")) {
-                message = itemFactory.message(chat_id, "Per ordinare una stampa immediata dovrai realizzare 4 steps:\n1- Caricare un file PDF (20 MB max)\n2- Indicare se si vuole una stampa fronte o fronte/retro\n3- Indicare quante pagine per foglio (1, 2 o 4)\n4- Indicare il numero di copie desiderate\n\nSe hai tutte le informazioni necessarie inizia l'ordine caricando ora il file PDF in questa finestra di chat.");
+                message = itemFactory.message(chat_id, "Ordina una Stampa Immediata in solo 5 passi:\n1- Carica un file PDF (20 MB max)\n2- Indica se vuoi una stampa a colori o in bianco e nero\n3- Indica se preferisci una stampa fronte o fronte/retro\n4- Indica quante pagine per foglio (1, 2 o 4) preferisci\n5- Indica il numero di copie desiderate\n\nSe hai tutte le informazioni necessarie inizia l'ordine caricando ora il file PDF in questa finestra di chat.");
             } else if(call_data.startsWith("printParametersBackFont#")){
                 String choice = call_data.substring(call_data.indexOf("#")+1);
                 Action actionInProgress = getActionInProgress(user_id);
@@ -64,6 +65,12 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 String choice = call_data.substring(call_data.indexOf("#")+1);
                 Action actionInProgress = getActionInProgress(user_id);
                 actionInProgress.setPagesPerSheet(Integer.parseInt(choice));
+                resourceManagerService.saveAction(actionInProgress);
+                message = itemFactory.printParametersSelection(actionInProgress,chat_id);
+            } else if(call_data.startsWith("printParametersGrayScaleOrColor#")){
+                String choice = call_data.substring(call_data.indexOf("#")+1);
+                Action actionInProgress = getActionInProgress(user_id);
+                actionInProgress.setColorType(ColorType.valueOf(choice));
                 resourceManagerService.saveAction(actionInProgress);
                 message = itemFactory.printParametersSelection(actionInProgress,chat_id);
             }
