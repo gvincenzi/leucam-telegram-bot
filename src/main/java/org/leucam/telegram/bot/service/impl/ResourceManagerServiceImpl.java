@@ -8,14 +8,13 @@ import org.leucam.telegram.bot.dto.OrderDTO;
 import org.leucam.telegram.bot.dto.ProductDTO;
 import org.leucam.telegram.bot.dto.UserDTO;
 import org.leucam.telegram.bot.model.Action;
-import org.leucam.telegram.bot.model.ActionType;
+import org.leucam.telegram.bot.model.type.ActionType;
 import org.leucam.telegram.bot.repository.ActionRepository;
 import org.leucam.telegram.bot.service.ResourceManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.User;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 @Component

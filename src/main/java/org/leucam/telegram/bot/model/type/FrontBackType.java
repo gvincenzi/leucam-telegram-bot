@@ -1,4 +1,4 @@
-package org.leucam.telegram.bot.model;
+package org.leucam.telegram.bot.model.type;
 
 public enum FrontBackType {
     FRONT("Fronte"),FRONT_BACK("Fronte/Retro");

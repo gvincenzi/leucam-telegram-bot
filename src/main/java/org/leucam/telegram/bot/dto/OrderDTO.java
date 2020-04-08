@@ -2,9 +2,9 @@ package org.leucam.telegram.bot.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.leucam.telegram.bot.model.ActionType;
-import org.leucam.telegram.bot.model.ColorType;
-import org.leucam.telegram.bot.model.FrontBackType;
+import org.leucam.telegram.bot.model.type.ActionType;
+import org.leucam.telegram.bot.model.type.ColorType;
+import org.leucam.telegram.bot.model.type.FrontBackType;
 
 @Data
 @NoArgsConstructor

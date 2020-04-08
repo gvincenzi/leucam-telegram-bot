@@ -1,4 +1,4 @@
-package org.leucam.telegram.bot.model;
+package org.leucam.telegram.bot.model.type;
 
 public enum ColorType {
     GRAY_SCALE("Bianco e Nero"),COLOR("Colore");

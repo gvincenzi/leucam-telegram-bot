@@ -2,8 +2,8 @@ package org.leucam.telegram.bot.polling.factory.impl;
 
 import org.leucam.telegram.bot.dto.UserDTO;
 import org.leucam.telegram.bot.model.Action;
-import org.leucam.telegram.bot.model.ColorType;
-import org.leucam.telegram.bot.model.FrontBackType;
+import org.leucam.telegram.bot.model.type.ColorType;
+import org.leucam.telegram.bot.model.type.FrontBackType;
 import org.leucam.telegram.bot.polling.factory.ItemFactory;
 import org.leucam.telegram.bot.service.ResourceManagerService;
 import org.springframework.beans.factory.annotation.Autowired;

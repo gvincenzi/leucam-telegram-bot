@@ -1,4 +1,4 @@
-package org.leucam.telegram.bot.model;
+package org.leucam.telegram.bot.model.type;
 
 public enum ActionType {
     QUICK_PRINT("Stampa immediata");

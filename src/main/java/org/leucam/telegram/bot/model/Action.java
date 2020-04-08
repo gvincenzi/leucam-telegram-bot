@@ -2,6 +2,9 @@ package org.leucam.telegram.bot.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.leucam.telegram.bot.model.type.ActionType;
+import org.leucam.telegram.bot.model.type.ColorType;
+import org.leucam.telegram.bot.model.type.FrontBackType;
 
 import javax.persistence.*;
 
