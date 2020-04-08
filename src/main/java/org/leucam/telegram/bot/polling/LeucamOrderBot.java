@@ -2,6 +2,9 @@ package org.leucam.telegram.bot.polling;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.leucam.telegram.bot.dto.OrderDTO;
+import org.leucam.telegram.bot.dto.ProductDTO;
+import org.leucam.telegram.bot.dto.UserDTO;
 import org.leucam.telegram.bot.model.Action;
 import org.leucam.telegram.bot.model.ActionType;
 import org.leucam.telegram.bot.model.ColorType;
@@ -104,6 +107,28 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 actionInProgress.setNumberOfCopies(Integer.parseInt(update.getMessage().getText()));
                 actionInProgress.setInProgress(Boolean.FALSE);
                 resourceManagerService.saveAction(actionInProgress);
+
+                OrderDTO orderDTO = new OrderDTO();
+                orderDTO.setActionType(actionInProgress.getActionType());
+                orderDTO.setColorType(actionInProgress.getColorType());
+                orderDTO.setFrontBackType(actionInProgress.getFrontBackType());
+                orderDTO.setNumberOfCopies(actionInProgress.getNumberOfCopies());
+                orderDTO.setPagesPerSheet(actionInProgress.getPagesPerSheet());
+                UserDTO userDTO = new UserDTO();
+                userDTO.setTelegramUserId(user_id);
+                orderDTO.setUser(userDTO);
+
+                ProductDTO productDTO = new ProductDTO();
+                /*productDTO.setProductId(actionInProgress.getProductId());*/
+                if(ActionType.QUICK_PRINT.equals(actionInProgress.getActionType())){
+                    productDTO.setActive(Boolean.FALSE);
+                    productDTO.setDescription("Documento proposto da un utente");
+                    productDTO.setName(actionInProgress.getName());
+                    productDTO.setFileId(actionInProgress.getFileId());
+                }
+                orderDTO.setProduct(productDTO);
+
+                resourceManagerService.postOrder(orderDTO);
                 message = itemFactory.message(chat_id, actionInProgress.toString()+"\n\nOrdine di stampa registrato correttamente, una mail di conferma con una sintesi dell'acquisto e le modalità di pagamento è stata inviata sul tuo indirizzo email.");
 
             } else if (update.hasMessage()) {

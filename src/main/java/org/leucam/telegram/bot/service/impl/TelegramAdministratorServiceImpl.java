@@ -1,6 +1,7 @@
 package org.leucam.telegram.bot.service.impl;
 
 import org.leucam.telegram.bot.client.UserResourceClient;
+import org.leucam.telegram.bot.dto.OrderDTO;
 import org.leucam.telegram.bot.dto.UserDTO;
 import org.leucam.telegram.bot.polling.LeucamOrderBot;
 import org.leucam.telegram.bot.service.TelegramAdministratorService;
@@ -27,6 +28,19 @@ public class TelegramAdministratorServiceImpl implements TelegramAdministratorSe
                 SendMessage message = new SendMessage()
                         .setChatId(String.valueOf(administrator.getTelegramUserId()))
                         .setText("Nuovo utente registrato : " + userDTO.getName() + " " + userDTO.getSurname());
+                leucamOrderBot.execute(message);
+            }
+        }
+    }
+
+    @Override
+    public void sendOrderMessage(OrderDTO orderDTO) throws TelegramApiException {
+        List<UserDTO> administrators = userResourceClient.getAdministrators();
+        if(administrators != null && !administrators.isEmpty()) {
+            for(UserDTO administrator : administrators) {
+                SendMessage message = new SendMessage()
+                        .setChatId(String.valueOf(administrator.getTelegramUserId()))
+                        .setText("Nuovo ordine registrato da "+orderDTO.getUser().getName()+" "+orderDTO.getUser().getSurname()+":\n" + orderDTO.toString());
                 leucamOrderBot.execute(message);
             }
         }

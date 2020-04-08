@@ -1,9 +1,14 @@
 package org.leucam.telegram.bot.service.impl;
 
 import feign.FeignException;
+import org.leucam.telegram.bot.client.OrderResourceClient;
+import org.leucam.telegram.bot.client.ProductResourceClient;
 import org.leucam.telegram.bot.client.UserResourceClient;
+import org.leucam.telegram.bot.dto.OrderDTO;
+import org.leucam.telegram.bot.dto.ProductDTO;
 import org.leucam.telegram.bot.dto.UserDTO;
 import org.leucam.telegram.bot.model.Action;
+import org.leucam.telegram.bot.model.ActionType;
 import org.leucam.telegram.bot.repository.ActionRepository;
 import org.leucam.telegram.bot.service.ResourceManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +22,12 @@ import java.util.Optional;
 public class ResourceManagerServiceImpl implements ResourceManagerService {
     @Autowired
     private UserResourceClient userResourceClient;
+
+    @Autowired
+    private OrderResourceClient orderResourceClient;
+
+    @Autowired
+    private ProductResourceClient productResourceClient;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -60,5 +71,14 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     @Override
     public void saveAction(Action action) {
         actionRepository.save(action);
+    }
+
+    @Override
+    public void postOrder(OrderDTO orderDTO) {
+        if(ActionType.QUICK_PRINT.equals(orderDTO.getActionType())){
+            ProductDTO productPersisted = productResourceClient.postProduct(orderDTO.getProduct());
+            orderDTO.setProduct(productPersisted);
+        }
+        orderResourceClient.postOrder(orderDTO);
     }
 }
