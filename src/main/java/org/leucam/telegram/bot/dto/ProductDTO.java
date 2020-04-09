@@ -10,6 +10,7 @@ public class ProductDTO implements Comparable<ProductDTO> {
     private String name;
     private String description;
     private String fileId;
+    private String filePath;
     private Boolean active = Boolean.TRUE;
 
     @Override

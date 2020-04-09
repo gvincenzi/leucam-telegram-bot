@@ -37,10 +37,17 @@ feign:
         readTimeout: 15000
 
 leucam:
+  repository:
+    path: c:/lcpm/products/
+    extension: .pdf
+
   telegram:
     bot:
       username: YOUR_USERNAME
       token: YOUR_TOKEN
+
+  template:
+    paymentInternalCreditURL: http://192.168.1.12:8881/gassman-payment-service/public/internal-credit/make/payment/%d
 
   api:
     username:

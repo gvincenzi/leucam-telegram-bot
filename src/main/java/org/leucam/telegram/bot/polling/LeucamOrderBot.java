@@ -20,9 +20,14 @@ import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class LeucamOrderBot extends TelegramLongPollingBot {
@@ -31,6 +36,9 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
 
     @Value("${leucam.telegram.bot.token}")
     private String botToken;
+
+    @Value("${leucam.template.paymentInternalCreditURL}")
+    public String templatePaymentInternalCreditURL;
 
     @Autowired
     ResourceManagerService resourceManagerService;
@@ -76,6 +84,45 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 actionInProgress.setColorType(ColorType.valueOf(choice));
                 resourceManagerService.saveAction(actionInProgress);
                 message = itemFactory.printParametersSelection(actionInProgress,chat_id);
+            } else if (call_data.startsWith("listaOrdini")) {
+                List<OrderDTO> orders = resourceManagerService.getOrders(user_id);
+                if (orders.isEmpty()) {
+                    message = itemFactory.message(chat_id,"Non hai ordini in corso");
+                } else {
+                    InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+                    List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+                    Collections.sort(orders);
+                    for (OrderDTO orderDTO : orders) {
+                        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+                        rowInline.add(new InlineKeyboardButton().setText("ID#"+orderDTO.getOrderId()+" : "+orderDTO.getProduct().getName()).setCallbackData("orderDetails#" + orderDTO.getOrderId()));
+                        rowsInline.add(rowInline);
+                    }
+
+                    markupInline.setKeyboard(rowsInline);
+                    message = itemFactory.message(chat_id,"Qui di seguito la lista dei tuoi ordini in corso, per accedere ai dettagli cliccare sull'ordine:\n");
+
+                    message.setReplyMarkup(markupInline);
+                }
+            } else if (call_data.startsWith("orderDetails#")) {
+                OrderDTO orderDTO = resourceManagerService.getOrder(call_data);
+                message = itemFactory.message(chat_id,orderDTO.toString());
+                InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+                List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+                List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
+                List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+
+                String paymentInternalCreditURL = String.format(templatePaymentInternalCreditURL,orderDTO.getOrderId()).replaceAll(" ","%20");
+                rowInline1.add(new InlineKeyboardButton().setText("Paga questo ordine").setUrl(paymentInternalCreditURL));
+                rowInline2.add(new InlineKeyboardButton().setText("Torna alla lista").setCallbackData("listaOrdini"));
+                // Set the keyboard to the markup
+                if(!orderDTO.getPaid()){
+                    rowsInline.add(rowInline1);
+                }
+
+                rowsInline.add(rowInline2);
+                // Add it to the message
+                markupInline.setKeyboard(rowsInline);
+                message.setReplyMarkup(markupInline);
             }
         } else if (update.hasMessage()){
             user_id = update.getMessage().getFrom().getId();
@@ -86,18 +133,14 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 message = itemFactory.welcomeMessage(update);
             } else if (update.getMessage().getDocument() != null && update.getMessage().getDocument().getMimeType().equalsIgnoreCase("application/pdf")) {
                 Document doc = update.getMessage().getDocument();
-                try {
-                    File original = downloadFileWithId(doc.getFileId());
-                    File copied = new File(original.getName());
-                    FileUtils.copyFile(original, copied);
-                } catch (TelegramApiException | IOException e) {
-                }
+                File file = resourceManagerService.saveDocument(update);
 
                 Action action = new Action();
                 action.setActionType(ActionType.QUICK_PRINT);
                 action.setTelegramUserId(update.getMessage().getFrom().getId());
                 action.setName(doc.getFileName());
                 action.setFileId(doc.getFileId());
+                action.setFilePath(file.getAbsolutePath());
                 resourceManagerService.saveAction(action);
                 message = itemFactory.printParametersSelection(action,chat_id);
             } else if (update.getMessage().getText().contains("@")) {
@@ -125,6 +168,7 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                     productDTO.setDescription("Documento proposto da un utente");
                     productDTO.setName(actionInProgress.getName());
                     productDTO.setFileId(actionInProgress.getFileId());
+                    productDTO.setFilePath(actionInProgress.getFilePath());
                 }
                 orderDTO.setProduct(productDTO);
 
@@ -154,9 +198,5 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return botToken;
-    }
-
-    private File downloadFileWithId(String fileId) throws TelegramApiException {
-        return this.downloadFile(this.execute(new GetFile().setFileId(fileId)));
     }
 }

@@ -21,6 +21,8 @@ public class Action {
     @Column
     private String fileId;
     @Column
+    private String filePath;
+    @Column
     private ActionType actionType;
     @Column
     private FrontBackType frontBackType;

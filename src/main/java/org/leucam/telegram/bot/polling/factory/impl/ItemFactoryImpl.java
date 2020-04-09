@@ -42,19 +42,22 @@ public class ItemFactoryImpl implements ItemFactory {
         List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline3 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline4 = new ArrayList<>();
         if (user == null) {
             rowInline1.add(new InlineKeyboardButton().setText("Iscrizione").setCallbackData("iscrizione"));
         } else {
-            rowInline1.add(new InlineKeyboardButton().setText("Stampa Immediata").setCallbackData("stampaImmediata"));
-            rowInline2.add(new InlineKeyboardButton().setText("Cancellazione").setCallbackData("cancellazione"));
-            rowInline3.add(new InlineKeyboardButton().setText("Invia avviso agli iscritti").setCallbackData("advertising"));
+            rowInline1.add(new InlineKeyboardButton().setText("I tuoi ordini").setCallbackData("listaOrdini"));
+            rowInline2.add(new InlineKeyboardButton().setText("Stampa Immediata").setCallbackData("stampaImmediata"));
+            rowInline3.add(new InlineKeyboardButton().setText("Cancellazione").setCallbackData("cancellazione"));
+            rowInline4.add(new InlineKeyboardButton().setText("Invia avviso agli iscritti").setCallbackData("advertising"));
         }
 
         // Set the keyboard to the markup
         rowsInline.add(rowInline1);
         rowsInline.add(rowInline2);
+        rowsInline.add(rowInline3);
         if (user != null && user.getAdministrator()) {
-            rowsInline.add(rowInline3);
+            rowsInline.add(rowInline4);
         }
 
         // Add it to the message
