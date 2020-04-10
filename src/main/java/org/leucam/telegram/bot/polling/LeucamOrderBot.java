@@ -16,15 +16,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Document;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.payments.LabeledPrice;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +41,9 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
 
     @Value("${leucam.telegram.bot.token}")
     private String botToken;
+
+    @Value("${leucam.telegram.bot.stripe.token}")
+    private String stripeToken;
 
     @Value("${leucam.template.paymentInternalCreditURL}")
     public String templatePaymentInternalCreditURL;
@@ -51,19 +59,53 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        SendMessage message = null;
+        BotApiMethod message = null;
         Integer user_id = null;
+
+        if(update.hasPreCheckoutQuery()){
+            /* CHECK PAYLOAD */
+            message = new AnswerPreCheckoutQuery();
+            ((AnswerPreCheckoutQuery)message).setOk(true);
+            ((AnswerPreCheckoutQuery)message).setPreCheckoutQueryId(update.getPreCheckoutQuery().getId());
+        }
         if (update.hasCallbackQuery()) {
             // Set variables
             String call_data = update.getCallbackQuery().getData();
             user_id = update.getCallbackQuery().getFrom().getId();
-            long chat_id = update.getCallbackQuery().getMessage().getChatId();
+            Long chat_id = update.getCallbackQuery().getMessage().getChatId();
 
             if (call_data.equals("iscrizione")) {
                 message = itemFactory.message(chat_id, "Per iscriversi al sistema basta scrivere un messaggio in questa chat con solo la propria email.\nLeucam Print Manager vi iscriverà al sistema con i dati del vostro account Telegram e con la mail che avrete indicato");
             } else if (call_data.equals("cancellazione")) {
                 resourceManagerService.deleteUser(user_id);
                 message = itemFactory.message(chat_id, "Utente rimosso correttamente");
+            } else if (call_data.equals("creditoResiduo")) {
+                message = itemFactory.message(chat_id,String.format("Il tuo credito residuo : %s €", resourceManagerService.getCredit(user_id).getCredit()));
+            } else if (call_data.equals("fondoCassa")) {
+                message = itemFactory.message(chat_id,"Fondo cassa corrente : " + resourceManagerService.totalUserCredit() + "€");
+            } else if (call_data.equals("ricaricaCredito")) {
+                message = itemFactory.credit(chat_id);
+            } else if(call_data.startsWith("credit#")) {
+                String choice = call_data.substring(call_data.indexOf("#") + 1);
+                StringBuilder payload = new StringBuilder();
+                payload.append(user_id);
+                payload.append(choice);
+                LabeledPrice price = new LabeledPrice();
+                price.setLabel("Ricarica credito");
+                price.setAmount(Integer.parseInt(choice));
+
+                message = new SendInvoice();
+                ((SendInvoice) message).setProviderToken(stripeToken);
+                List<LabeledPrice> prices = new ArrayList<>();
+                prices.add(price);
+                ((SendInvoice) message).setPrices(prices);
+                ((SendInvoice) message).setTitle("Leucam Print Manager - Credito");
+                ((SendInvoice) message).setDescription("Ricarica del conto prepagato");
+                ((SendInvoice) message).setCurrency("EUR");
+                ((SendInvoice) message).setChatId(chat_id.intValue());
+                ((SendInvoice) message).setPayload(payload.toString());
+                ((SendInvoice) message).setStartParameter("pay");
+
             } else if(call_data.equals("stampaImmediata")) {
                 message = itemFactory.message(chat_id, "Ordina una Stampa Immediata in solo 5 passi:\n1- Carica un file PDF (20 MB max)\n2- Indica se vuoi una stampa a colori o in bianco e nero\n3- Indica se preferisci una stampa fronte o fronte/retro\n4- Indica quante pagine per foglio (1, 2 o 4) preferisci\n5- Indica il numero di copie desiderate\n\nSe hai tutte le informazioni necessarie inizia l'ordine caricando ora il file PDF in questa finestra di chat.");
             } else if(call_data.startsWith("printParametersBackFont#")){
@@ -101,7 +143,7 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                     markupInline.setKeyboard(rowsInline);
                     message = itemFactory.message(chat_id,"Qui di seguito la lista dei tuoi ordini in corso, per accedere ai dettagli cliccare sull'ordine:\n");
 
-                    message.setReplyMarkup(markupInline);
+                    ((SendMessage)message).setReplyMarkup(markupInline);
                 }
             } else if (call_data.startsWith("orderDetails#")) {
                 OrderDTO orderDTO = resourceManagerService.getOrder(call_data);
@@ -122,7 +164,7 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 rowsInline.add(rowInline2);
                 // Add it to the message
                 markupInline.setKeyboard(rowsInline);
-                message.setReplyMarkup(markupInline);
+                ((SendMessage)message).setReplyMarkup(markupInline);
             }
         } else if (update.hasMessage()){
             user_id = update.getMessage().getFrom().getId();
@@ -182,7 +224,12 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
 
         try {
             execute(message); // Call method to send the message
+
+            if(message instanceof AnswerPreCheckoutQuery){
+                resourceManagerService.addCredit(update.getPreCheckoutQuery().getFrom().getId(),BigDecimal.valueOf(update.getPreCheckoutQuery().getTotalAmount()));
+            }
         } catch (TelegramApiException e) {
+            System.out.println(e.getMessage());
         }
     }
 

@@ -43,21 +43,26 @@ public class ItemFactoryImpl implements ItemFactory {
         List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline3 = new ArrayList<>();
         List<InlineKeyboardButton> rowInline4 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline5 = new ArrayList<>();
         if (user == null) {
             rowInline1.add(new InlineKeyboardButton().setText("Iscrizione").setCallbackData("iscrizione"));
         } else {
-            rowInline1.add(new InlineKeyboardButton().setText("I tuoi ordini").setCallbackData("listaOrdini"));
-            rowInline2.add(new InlineKeyboardButton().setText("Stampa Immediata").setCallbackData("stampaImmediata"));
-            rowInline3.add(new InlineKeyboardButton().setText("Cancellazione").setCallbackData("cancellazione"));
-            rowInline4.add(new InlineKeyboardButton().setText("Invia avviso agli iscritti").setCallbackData("advertising"));
+            rowInline1.add(new InlineKeyboardButton().setText("Stampa Immediata").setCallbackData("stampaImmediata"));
+            rowInline2.add(new InlineKeyboardButton().setText("I tuoi ordini").setCallbackData("listaOrdini"));
+            rowInline3.add(new InlineKeyboardButton().setText("Credito residuo").setCallbackData("creditoResiduo"));
+            rowInline3.add(new InlineKeyboardButton().setText("Ricarica credito").setCallbackData("ricaricaCredito"));
+            rowInline4.add(new InlineKeyboardButton().setText("Cancellazione").setCallbackData("cancellazione"));
+            rowInline5.add(new InlineKeyboardButton().setText("Fondo cassa").setCallbackData("fondoCassa"));
+            rowInline5.add(new InlineKeyboardButton().setText("Invia avviso agli iscritti").setCallbackData("advertising"));
         }
 
         // Set the keyboard to the markup
         rowsInline.add(rowInline1);
         rowsInline.add(rowInline2);
         rowsInline.add(rowInline3);
+        rowsInline.add(rowInline4);
         if (user != null && user.getAdministrator()) {
-            rowsInline.add(rowInline4);
+            rowsInline.add(rowInline5);
         }
 
         // Add it to the message
@@ -71,6 +76,31 @@ public class ItemFactoryImpl implements ItemFactory {
         return new SendMessage()
                 .setChatId(chat_id)
                 .setText(text);
+    }
+
+    @Override
+    public SendMessage credit(Long chat_id) {
+        SendMessage message;
+        InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+        message = new SendMessage()
+                .setChatId(chat_id)
+                .setText("Ricarica il tuo credito scegliendo tra le seguenti opzioni:");
+
+        List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+        rowInline1.add(new InlineKeyboardButton().setText("5 euro").setCallbackData("credit#500"));
+        rowInline1.add(new InlineKeyboardButton().setText("10 euro").setCallbackData("credit#1000"));
+        rowInline2.add(new InlineKeyboardButton().setText("20 euro").setCallbackData("credit#2000"));
+        rowInline2.add(new InlineKeyboardButton().setText("50 euro").setCallbackData("credit#5000"));
+
+        rowsInline.add(rowInline1);
+        rowsInline.add(rowInline2);
+
+        // Add it to the message
+        markupInline.setKeyboard(rowsInline);
+        message.setReplyMarkup(markupInline);
+        return message;
     }
 
     @Override

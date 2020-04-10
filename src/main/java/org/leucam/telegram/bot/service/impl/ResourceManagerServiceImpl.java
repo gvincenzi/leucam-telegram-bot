@@ -4,9 +4,11 @@ import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.leucam.telegram.bot.client.OrderResourceClient;
 import org.leucam.telegram.bot.client.ProductResourceClient;
+import org.leucam.telegram.bot.client.UserCreditResourceClient;
 import org.leucam.telegram.bot.client.UserResourceClient;
 import org.leucam.telegram.bot.dto.OrderDTO;
 import org.leucam.telegram.bot.dto.ProductDTO;
+import org.leucam.telegram.bot.dto.UserCreditDTO;
 import org.leucam.telegram.bot.dto.UserDTO;
 import org.leucam.telegram.bot.model.Action;
 import org.leucam.telegram.bot.model.type.ActionType;
@@ -24,6 +26,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +49,9 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
 
     @Autowired
     private ProductResourceClient productResourceClient;
+
+    @Autowired
+    private UserCreditResourceClient userCreditResourceClient;
 
     @Autowired
     private ActionRepository actionRepository;
@@ -130,5 +136,22 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
 
     private File downloadFileWithId(String fileId) throws TelegramApiException {
         return leucamOrderBot.downloadFile(leucamOrderBot.execute(new GetFile().setFileId(fileId)));
+    }
+
+    @Override
+    public BigDecimal totalUserCredit() {
+        return userCreditResourceClient.totalUserCredit();
+    }
+
+    @Override
+    public UserCreditDTO getCredit(Integer user_id) {
+        UserDTO user = findUserByTelegramId(user_id);
+        return userCreditResourceClient.findById(user.getId());
+    }
+
+    @Override
+    public UserCreditDTO addCredit(Integer user_id, BigDecimal credit) {
+        UserDTO user = findUserByTelegramId(user_id);
+        return userCreditResourceClient.addCredit(user, credit.divide(BigDecimal.valueOf(100)));
     }
 }

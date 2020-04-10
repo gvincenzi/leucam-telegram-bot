@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public interface ItemFactory {
     SendMessage welcomeMessage(Update update);
     SendMessage message(Long chat_id, String text);
+    SendMessage credit(Long chat_id);
     SendMessage printParametersBackFont(Action actionInProgress, Long chat_id);
     SendMessage printParametersCopies(Action actionInProgress, Long chat_id);
     SendMessage printParametersPagesPerSheet(Action actionInProgress, Long chat_id);
