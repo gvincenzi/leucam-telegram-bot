@@ -29,7 +29,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -154,7 +154,7 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
 
                 String paymentInternalCreditURL = String.format(templatePaymentInternalCreditURL,orderDTO.getOrderId()).replaceAll(" ","%20");
-                rowInline1.add(new InlineKeyboardButton().setText("Paga questo ordine").setUrl(paymentInternalCreditURL));
+                rowInline1.add(new InlineKeyboardButton().setText("Paga questo ordine : "+ NumberFormat.getCurrencyInstance().format(orderDTO.getTotalToPay())).setCallbackData("makePayment#"+orderDTO.getOrderId()));
                 rowInline2.add(new InlineKeyboardButton().setText("Torna alla lista").setCallbackData("listaOrdini"));
                 // Set the keyboard to the markup
                 if(!orderDTO.getPaid()){
@@ -165,6 +165,9 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 // Add it to the message
                 markupInline.setKeyboard(rowsInline);
                 ((SendMessage)message).setReplyMarkup(markupInline);
+            } else if (call_data.startsWith("makePayment#")) {
+                OrderDTO orderDTO = resourceManagerService.getOrder(call_data);
+                message = itemFactory.message(chat_id, resourceManagerService.makePayment(orderDTO));
             }
         } else if (update.hasMessage()){
             user_id = update.getMessage().getFrom().getId();

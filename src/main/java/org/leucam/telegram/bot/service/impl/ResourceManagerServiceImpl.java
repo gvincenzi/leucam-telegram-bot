@@ -116,7 +116,9 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     public OrderDTO getOrder(String call_data) {
         String[] split = call_data.split("#");
         Long orderId = Long.parseLong(split[1]);
-        return orderResourceClient.findOrderById(orderId);
+        OrderDTO orderDTO = orderResourceClient.findOrderById(orderId);
+        orderDTO.setTotalToPay(userCreditResourceClient.getOrderPrice(orderId));
+        return orderDTO;
     }
 
     @Override
@@ -153,5 +155,10 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     public UserCreditDTO addCredit(Integer user_id, BigDecimal credit) {
         UserDTO user = findUserByTelegramId(user_id);
         return userCreditResourceClient.addCredit(user, credit.divide(BigDecimal.valueOf(100)));
+    }
+
+    @Override
+    public String makePayment(OrderDTO orderDTO) {
+        return userCreditResourceClient.makePayment(orderDTO.getOrderId());
     }
 }

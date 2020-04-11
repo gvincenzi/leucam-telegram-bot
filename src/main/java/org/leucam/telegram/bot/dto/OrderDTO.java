@@ -1,10 +1,13 @@
 package org.leucam.telegram.bot.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.leucam.telegram.bot.model.type.ActionType;
 import org.leucam.telegram.bot.model.type.ColorType;
 import org.leucam.telegram.bot.model.type.FrontBackType;
+
+import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
@@ -18,6 +21,8 @@ public class OrderDTO implements Comparable<OrderDTO>{
     private UserDTO user;
     private ProductDTO product;
     private Boolean paid = Boolean.FALSE;
+    @JsonIgnore
+    private BigDecimal totalToPay;
 
     @Override
     public int compareTo(OrderDTO orderDTO) {
@@ -27,7 +32,7 @@ public class OrderDTO implements Comparable<OrderDTO>{
     @Override
     public String toString() {
         return "\nID : " + orderId +
-                "\nProdotto : " + product +
+                "\nFile PDF : " + product +
                 "\nTipo di ordine=" + actionType.getLabel() +
                 "\nBianco e Nero o Colore=" + colorType.getLabel() +
                 "\nFronte/Retro=" + frontBackType.getLabel() +

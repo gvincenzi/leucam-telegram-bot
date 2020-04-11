@@ -20,5 +20,11 @@ public interface UserCreditResourceClient {
     BigDecimal totalUserCredit();
 
     @PutMapping("/{credit}")
-    public UserCreditDTO addCredit(@RequestBody UserDTO user, @PathVariable("credit") BigDecimal credit);
+    UserCreditDTO addCredit(@RequestBody UserDTO user, @PathVariable("credit") BigDecimal credit);
+
+    @GetMapping("/order/{orderId}/price")
+    BigDecimal getOrderPrice(@PathVariable("orderId") Long orderId);
+
+    @PutMapping(value = "/order/{orderId}/pay")
+    String makePayment(@PathVariable("orderId") Long orderId);
 }
