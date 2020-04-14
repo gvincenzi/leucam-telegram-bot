@@ -23,4 +23,9 @@ public class MQListener {
     public void processUserOrder(OrderDTO msg) throws TelegramApiException {
         telegramAdministratorService.sendOrderMessage(msg);
     }
+
+    @StreamListener(target = MQBinding.ORDER_UPDATE)
+    public void processOrderUpdate(OrderDTO msg) throws TelegramApiException {
+        telegramAdministratorService.sendOrderUpdateMessage(msg);
+    }
 }

@@ -45,4 +45,15 @@ public class TelegramAdministratorServiceImpl implements TelegramAdministratorSe
             }
         }
     }
+
+    @Override
+    public void sendOrderUpdateMessage(OrderDTO msg) throws TelegramApiException {
+        UserDTO destination = userResourceClient.findUserByTelegramId(msg.getUser().getTelegramUserId());
+        if(destination != null) {
+            SendMessage message = new SendMessage()
+                    .setChatId(String.valueOf(destination.getTelegramUserId()))
+                    .setText("Aggiornamento del tuo ordine #"+msg.getOrderId() + ":\n" + msg.toString());
+            leucamOrderBot.execute(message);
+        }
+    }
 }

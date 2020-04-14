@@ -20,6 +20,10 @@ spring:
         bindings:
           userRegistrationChannel:
             destination: leucam-user-registration
+          userOrderChannel:
+            destination: leucam-order-registration
+          orderUpdateChannel:
+            destination: leucam-order-update
 eureka:
   instance:
     hostname: localhost

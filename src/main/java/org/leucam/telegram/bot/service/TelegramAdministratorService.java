@@ -7,4 +7,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public interface TelegramAdministratorService {
     void sendRegistrationMessage(UserDTO userDTO) throws TelegramApiException;
     void sendOrderMessage(OrderDTO orderDTO) throws TelegramApiException;
+
+    void sendOrderUpdateMessage(OrderDTO msg) throws TelegramApiException;
 }
