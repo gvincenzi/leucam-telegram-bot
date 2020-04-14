@@ -28,4 +28,9 @@ public class MQListener {
     public void processOrderUpdate(OrderDTO msg) throws TelegramApiException {
         telegramAdministratorService.sendOrderUpdateMessage(msg);
     }
+
+    @StreamListener(target = MQBinding.ORDER_CANCELLATION)
+    public void processOrderCancellation(OrderDTO msg) throws TelegramApiException {
+        telegramAdministratorService.sendOrderCancellationMessage(msg);
+    }
 }

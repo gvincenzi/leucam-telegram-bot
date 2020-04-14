@@ -24,6 +24,8 @@ spring:
             destination: leucam-order-registration
           orderUpdateChannel:
             destination: leucam-order-update
+          orderCancellationChannel:
+            destination: leucam-order-cancellation
 eureka:
   instance:
     hostname: localhost

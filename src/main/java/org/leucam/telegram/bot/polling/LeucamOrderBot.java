@@ -152,22 +152,35 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
                 List<InlineKeyboardButton> rowInline1 = new ArrayList<>();
                 List<InlineKeyboardButton> rowInline2 = new ArrayList<>();
+                List<InlineKeyboardButton> rowInline3 = new ArrayList<>();
 
                 String paymentInternalCreditURL = String.format(templatePaymentInternalCreditURL,orderDTO.getOrderId()).replaceAll(" ","%20");
                 rowInline1.add(new InlineKeyboardButton().setText("Paga questo ordine : "+ NumberFormat.getCurrencyInstance().format(orderDTO.getTotalToPay())).setCallbackData("makePayment#"+orderDTO.getOrderId()));
-                rowInline2.add(new InlineKeyboardButton().setText("Torna alla lista").setCallbackData("listaOrdini"));
+                rowInline2.add(new InlineKeyboardButton().setText("Annulla questo ordine").setCallbackData("deleteOrder#"+orderDTO.getOrderId()));
+                rowInline3.add(new InlineKeyboardButton().setText("Torna alla lista").setCallbackData("listaOrdini"));
                 // Set the keyboard to the markup
                 if(!orderDTO.getPaid()){
                     rowsInline.add(rowInline1);
                 }
-
-                rowsInline.add(rowInline2);
+                if(orderDTO.getOrderPreparationDate() == null){
+                    rowsInline.add(rowInline2);
+                }
+                rowsInline.add(rowInline3);
                 // Add it to the message
                 markupInline.setKeyboard(rowsInline);
                 ((SendMessage)message).setReplyMarkup(markupInline);
             } else if (call_data.startsWith("makePayment#")) {
                 OrderDTO orderDTO = resourceManagerService.getOrder(call_data);
                 message = itemFactory.message(chat_id, resourceManagerService.makePayment(orderDTO));
+            } else if (call_data.startsWith("deleteOrder#")) {
+                OrderDTO orderDTO = resourceManagerService.getOrder(call_data);
+                if(orderDTO.getOrderPreparationDate() != null){
+                    message = itemFactory.message(chat_id, "Non e' più possibile annullare questo ordine.");
+
+                } else {
+                    resourceManagerService.deleteOrder(orderDTO);
+                    message = itemFactory.message(chat_id, "Richiesta dell'annullamento inviata con successo. Riceverai una notifica su Telegram e una mail di conferma.");
+                }
             }
         } else if (update.hasMessage()){
             user_id = update.getMessage().getFrom().getId();

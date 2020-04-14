@@ -56,4 +56,25 @@ public class TelegramAdministratorServiceImpl implements TelegramAdministratorSe
             leucamOrderBot.execute(message);
         }
     }
+
+    @Override
+    public void sendOrderCancellationMessage(OrderDTO msg) throws TelegramApiException {
+        UserDTO destination = userResourceClient.findUserByTelegramId(msg.getUser().getTelegramUserId());
+        if(destination != null) {
+            SendMessage message = new SendMessage()
+                    .setChatId(String.valueOf(destination.getTelegramUserId()))
+                    .setText("Annullamento del tuo ordine #"+msg.getOrderId() + ":\n" + msg.toString());
+            leucamOrderBot.execute(message);
+        }
+
+        List<UserDTO> administrators = userResourceClient.getAdministrators();
+        if(administrators != null && !administrators.isEmpty()) {
+            for(UserDTO administrator : administrators) {
+                SendMessage message = new SendMessage()
+                        .setChatId(String.valueOf(administrator.getTelegramUserId()))
+                        .setText("Annullamento di un ordine di "+msg.getUser().getName()+" "+msg.getUser().getSurname()+":\n" + msg.toString());
+                leucamOrderBot.execute(message);
+            }
+        }
+    }
 }

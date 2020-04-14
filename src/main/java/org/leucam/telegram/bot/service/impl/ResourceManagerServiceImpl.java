@@ -161,4 +161,9 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     public String makePayment(OrderDTO orderDTO) {
         return userCreditResourceClient.makePayment(orderDTO.getOrderId());
     }
+
+    @Override
+    public void deleteOrder(OrderDTO orderDTO) {
+        orderResourceClient.deleteOrder(orderDTO.getOrderId());
+    }
 }

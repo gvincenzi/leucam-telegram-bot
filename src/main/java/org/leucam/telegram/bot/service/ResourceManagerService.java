@@ -25,4 +25,5 @@ public interface ResourceManagerService {
     UserCreditDTO getCredit(Integer user_id);
     UserCreditDTO addCredit(Integer user_id, BigDecimal credit);
     String makePayment(OrderDTO orderDTO);
+    void deleteOrder(OrderDTO orderDTO);
 }
