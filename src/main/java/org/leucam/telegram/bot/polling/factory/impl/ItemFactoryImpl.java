@@ -48,6 +48,7 @@ public class ItemFactoryImpl implements ItemFactory {
             rowInline1.add(new InlineKeyboardButton().setText("Iscrizione").setCallbackData("iscrizione"));
         } else {
             rowInline1.add(new InlineKeyboardButton().setText("Stampa Immediata").setCallbackData("stampaImmediata"));
+            rowInline1.add(new InlineKeyboardButton().setText("Catalogo").setCallbackData("catalogo"));
             rowInline2.add(new InlineKeyboardButton().setText("I tuoi ordini").setCallbackData("listaOrdini"));
             rowInline3.add(new InlineKeyboardButton().setText("Credito residuo").setCallbackData("creditoResiduo"));
             rowInline3.add(new InlineKeyboardButton().setText("Ricarica credito").setCallbackData("ricaricaCredito"));

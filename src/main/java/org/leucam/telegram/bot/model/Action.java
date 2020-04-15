@@ -19,6 +19,8 @@ public class Action {
     @Column
     private String name;
     @Column
+    private Long productId;
+    @Column
     private String fileId;
     @Column
     private String filePath;

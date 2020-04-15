@@ -21,4 +21,7 @@ public interface ProductResourceClient {
 
     @PostMapping()
     ProductDTO postProduct(@RequestBody ProductDTO product);
+
+    @GetMapping("/{id}")
+    ProductDTO findProductById(@PathVariable Long id);
 }

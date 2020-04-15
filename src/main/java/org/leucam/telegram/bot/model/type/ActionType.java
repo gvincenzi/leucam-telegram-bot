@@ -1,7 +1,7 @@
 package org.leucam.telegram.bot.model.type;
 
 public enum ActionType {
-    QUICK_PRINT("Stampa immediata");
+    QUICK_PRINT("Stampa immediata"), CATALOG("Stampa da catalogo");
 
     private String label;
 

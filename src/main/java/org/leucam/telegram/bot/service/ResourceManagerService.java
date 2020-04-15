@@ -1,6 +1,7 @@
 package org.leucam.telegram.bot.service;
 
 import org.leucam.telegram.bot.dto.OrderDTO;
+import org.leucam.telegram.bot.dto.ProductDTO;
 import org.leucam.telegram.bot.dto.UserCreditDTO;
 import org.leucam.telegram.bot.dto.UserDTO;
 import org.leucam.telegram.bot.model.Action;
@@ -26,4 +27,6 @@ public interface ResourceManagerService {
     UserCreditDTO addCredit(Integer user_id, BigDecimal credit);
     String makePayment(OrderDTO orderDTO);
     void deleteOrder(OrderDTO orderDTO);
+    List<ProductDTO> getProducts();
+    ProductDTO getProduct(String call_data);
 }

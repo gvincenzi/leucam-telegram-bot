@@ -181,6 +181,36 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                     resourceManagerService.deleteOrder(orderDTO);
                     message = itemFactory.message(chat_id, "Richiesta dell'annullamento inviata con successo. Riceverai una notifica su Telegram e una mail di conferma.");
                 }
+            } else if (call_data.startsWith("catalogo")) {
+                List<ProductDTO> products = resourceManagerService.getProducts();
+                if (products.isEmpty()) {
+                    message = itemFactory.message(chat_id,"Non ci sono documenti in catalogo");
+                } else {
+                    InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+                    List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+                    Collections.sort(products);
+                    for (ProductDTO productDTO : products) {
+                        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+                        rowInline.add(new InlineKeyboardButton().setText(productDTO.getName()).setCallbackData("selectProduct#" + productDTO.getProductId()));
+                        rowsInline.add(rowInline);
+                    }
+
+                    markupInline.setKeyboard(rowsInline);
+                    message = itemFactory.message(chat_id,"Qui di seguito la lista dei documenti in catalogo, selezionane uno per creare un ordine di stampa:\n");
+
+                    ((SendMessage)message).setReplyMarkup(markupInline);
+                }
+            } else if (call_data.startsWith("selectProduct#")) {
+                ProductDTO productDTO = resourceManagerService.getProduct(call_data);
+                Action action = new Action();
+                action.setActionType(ActionType.CATALOG);
+                action.setProductId(productDTO.getProductId());
+                action.setTelegramUserId(user_id);
+                action.setName(productDTO.getName());
+                action.setFileId(productDTO.getFileId());
+                action.setFilePath(productDTO.getFilePath());
+                resourceManagerService.saveAction(action);
+                message = itemFactory.printParametersSelection(action,chat_id);
             }
         } else if (update.hasMessage()){
             user_id = update.getMessage().getFrom().getId();
@@ -220,14 +250,16 @@ public class LeucamOrderBot extends TelegramLongPollingBot {
                 orderDTO.setUser(userDTO);
 
                 ProductDTO productDTO = new ProductDTO();
-                /*productDTO.setProductId(actionInProgress.getProductId());*/
                 if(ActionType.QUICK_PRINT.equals(actionInProgress.getActionType())){
                     productDTO.setActive(Boolean.FALSE);
                     productDTO.setDescription("Documento proposto da un utente");
                     productDTO.setName(actionInProgress.getName());
                     productDTO.setFileId(actionInProgress.getFileId());
                     productDTO.setFilePath(actionInProgress.getFilePath());
+                } else if(ActionType.CATALOG.equals(actionInProgress.getActionType())){
+                    productDTO.setProductId(actionInProgress.getProductId());
                 }
+
                 orderDTO.setProduct(productDTO);
 
                 resourceManagerService.postOrder(orderDTO);

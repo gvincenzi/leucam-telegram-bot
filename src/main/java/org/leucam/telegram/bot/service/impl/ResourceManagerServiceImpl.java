@@ -166,4 +166,16 @@ public class ResourceManagerServiceImpl implements ResourceManagerService {
     public void deleteOrder(OrderDTO orderDTO) {
         orderResourceClient.deleteOrder(orderDTO.getOrderId());
     }
+
+    @Override
+    public List<ProductDTO> getProducts() {
+        return productResourceClient.findAll();
+    }
+
+    @Override
+    public ProductDTO getProduct(String call_data) {
+        String[] split = call_data.split("#");
+        Long productId = Long.parseLong(split[1]);
+        return productResourceClient.findProductById(productId);
+    }
 }
